@@ -59,12 +59,28 @@ jobs:
           PROFILE_OUTPUT="$RUNNER_TEMP/endogram-verification-profiles"
           rm -rf "$PROFILE_OUTPUT"
           mkdir -p "$PROFILE_OUTPUT"
-          python3 build-system/Make/Make.py generate-verification-profiles \\
-            --configurationPath="build-system/appstore-configuration.json" \\
-            --codesigningInformationPath="build-system/fake-codesigning" \\
-            --destination="$PROFILE_OUTPUT"
+          python3 build-system/Make/Make.py generate-verification-profiles --configurationPath="build-system/appstore-configuration.json" --codesigningInformationPath="build-system/fake-codesigning" --destination="$PROFILE_OUTPUT"
           rm -rf build-system/fake-codesigning/profiles
           cp -R "$PROFILE_OUTPUT" build-system/fake-codesigning/profiles
+
+          python3 - <<'PY'
+          import datetime
+          import pathlib
+          import plistlib
+          import subprocess
+
+          profiles = sorted(pathlib.Path("build-system/fake-codesigning/profiles").glob("*.mobileprovision"))
+          if not profiles:
+              raise SystemExit("No regenerated provisioning profiles were produced")
+          now = datetime.datetime.now(datetime.timezone.utc).replace(tzinfo=None)
+          for profile in profiles:
+              raw = subprocess.check_output(["security", "cms", "-D", "-i", str(profile)])
+              data = plistlib.loads(raw)
+              expiration = data.get("ExpirationDate")
+              if not isinstance(expiration, datetime.datetime) or expiration <= now:
+                  raise SystemExit(f"Provisioning profile is still expired or invalid: {profile.name}: {expiration}")
+              print(f"Verified {profile.name}: expires {expiration.isoformat()}")
+          PY
 
           python3 build-system/Make/ImportCertificates.py --path build-system/fake-codesigning/certs
           python3 -u build-system/Make/Make.py \
