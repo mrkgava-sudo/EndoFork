@@ -1,4 +1,5 @@
 name: EndoGram iOS Build
+# Trigger a fresh validation build after enabling Actions.
 
 on:
   push:
