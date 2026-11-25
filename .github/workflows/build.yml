@@ -55,6 +55,17 @@ jobs:
           echo "BUILD_NUMBER=$BUILD_NUMBER" >> "$GITHUB_ENV"
           echo "APP_VERSION=$APP_VERSION" >> "$GITHUB_ENV"
 
+          # Re-sign repository-only verification profiles with the bundled fake certificate and refresh their expiry.
+          PROFILE_OUTPUT="$RUNNER_TEMP/endogram-verification-profiles"
+          rm -rf "$PROFILE_OUTPUT"
+          mkdir -p "$PROFILE_OUTPUT"
+          python3 build-system/Make/Make.py generate-verification-profiles \\
+            --configurationPath="build-system/appstore-configuration.json" \\
+            --codesigningInformationPath="build-system/fake-codesigning" \\
+            --destination="$PROFILE_OUTPUT"
+          rm -rf build-system/fake-codesigning/profiles
+          cp -R "$PROFILE_OUTPUT" build-system/fake-codesigning/profiles
+
           python3 build-system/Make/ImportCertificates.py --path build-system/fake-codesigning/certs
           python3 -u build-system/Make/Make.py \
             --bazelUserRoot="$BAZEL_USER_ROOT" \
