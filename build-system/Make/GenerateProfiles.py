@@ -115,6 +115,10 @@ def process_provisioning_profile(source, destination, certificate_data, signing_
     # Insert the new certificate
     run_executable_with_output('plutil', arguments=['-insert', 'DeveloperCertificates.0', '-data', certificate_data, parsed_plist_file])
 
+    # These repository profiles are verification-only and are re-signed with the fake local certificate.
+    # Extend their validity so current Xcode/Bazel rules can process them; the final IPA must be re-signed by the user.
+    run_executable_with_output('plutil', arguments=['-replace', 'ExpirationDate', '-date', '2036-01-01T00:00:00Z', parsed_plist_file], check_result=True)
+
     # Remove the DER-Encoded-Profile (signature)
     run_executable_with_output('plutil', arguments=['-remove', 'DER-Encoded-Profile', parsed_plist_file])
 
