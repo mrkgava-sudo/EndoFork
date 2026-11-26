@@ -117,13 +117,3 @@ jobs:
           path: /Users/Shared/endogram-ios/build/artifacts/EndoGram.ipa
           if-no-files-found: error
           retention-days: 14
-
-          echo "Verified IPA: $OUTPUT_PATH/EndoGram.ipa ($(stat -f%z "$OUTPUT_PATH/EndoGram.ipa") bytes)"
-
-      - name: Upload EndoGram IPA
-        uses: actions/upload-artifact@v4
-        with:
-          name: EndoGram-IPA-${{ github.run_number }}
-          path: /Users/Shared/endogram-ios/build/artifacts/EndoGram.ipa
-          if-no-files-found: error
-          retention-days: 14
