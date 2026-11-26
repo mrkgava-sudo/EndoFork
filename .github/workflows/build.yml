@@ -95,12 +95,32 @@ jobs:
           rm -rf "$OUTPUT_PATH"
           mkdir -p "$OUTPUT_PATH"
 
-          IPA_PATH="$(find bazel-out -type f -path '*/bin/Telegram/Telegram.ipa' -print -quit)"
-          if [ -z "$IPA_PATH" ]; then
-            echo "Could not find the device IPA produced by Bazel."
+          # Bazel exposes declared outputs through bazel-bin (a symlink to bazel-out).
+          # Prefer the exact output printed by Bazel, then fall back to a symlink-aware search.
+          IPA_PATH="bazel-bin/Telegram/Telegram.ipa"
+          if [ ! -s "$IPA_PATH" ]; then
+            IPA_PATH="$(find -L bazel-bin bazel-out -type f -path '*/bin/Telegram/Telegram.ipa' -print -quit 2>/dev/null || true)"
+          fi
+          if [ -z "$IPA_PATH" ] || [ ! -s "$IPA_PATH" ]; then
+            echo "Could not find a non-empty device IPA. Bazel expected bazel-bin/Telegram/Telegram.ipa."
+            echo "Available Bazel output links:"
+            ls -la | grep bazel || true
             exit 1
           fi
           cp "$IPA_PATH" "$OUTPUT_PATH/EndoGram.ipa"
+          test -s "$OUTPUT_PATH/EndoGram.ipa"
+          /usr/bin/unzip -t "$OUTPUT_PATH/EndoGram.ipa"
+          /usr/bin/unzip -Z1 "$OUTPUT_PATH/EndoGram.ipa" | grep -q '^Payload/Telegram.app/Info.plist
+
+      - name: Upload EndoGram IPA
+        uses: actions/upload-artifact@v4
+        with:
+          name: EndoGram-IPA-${{ github.run_number }}
+          path: /Users/Shared/endogram-ios/build/artifacts/EndoGram.ipa
+          if-no-files-found: error
+          retention-days: 14
+
+          echo "Verified IPA: $OUTPUT_PATH/EndoGram.ipa ($(stat -f%z "$OUTPUT_PATH/EndoGram.ipa") bytes)"
 
       - name: Upload EndoGram IPA
         uses: actions/upload-artifact@v4
