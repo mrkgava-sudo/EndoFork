@@ -1,3 +1,9 @@
+# EndoGram
+
+**EndoGram is an unofficial independent copy of Telegram.** It is a separate project that recreates Telegram-style interface, messaging experience, and features such as Stars, gifts, NFTs, and collections. It is not an official Telegram application and is not affiliated with, endorsed by, or supported by Telegram or Telegram Messenger LLP.
+
+The EndoGram project aims to use its own app identity and, where implemented, its own local/offline account and virtual economy. Features described here should not be considered available until they are implemented and verified in a build.
+
 # Telegram iOS Source Code Compilation Guide
 
 We welcome all developers to use our API and source code to create applications on our platform.
@@ -6,10 +12,10 @@ There are several things we require from **all developers** for the moment.
 # Creating your Telegram Application
 
 1. [**Obtain your own api_id**](https://core.telegram.org/api/obtaining_api_id) for your application.
-2. Please **do not** use the name Telegram for your app — or make sure your users understand that it is unofficial.
-3. Kindly **do not** use our standard logo (white paper plane in a blue circle) as your app's logo.
-3. Please study our [**security guidelines**](https://core.telegram.org/mtproto/security_guidelines) and take good care of your users' data and privacy.
-4. Please remember to publish **your** code too in order to comply with the licences.
+2. **Do not present EndoGram as an official Telegram app.** EndoGram is an unofficial independent copy.
+3. Do not use Telegram's standard logo (white paper plane in a blue circle) as EndoGram's logo.
+4. Study the [**security guidelines**](https://core.telegram.org/mtproto/security_guidelines) and take good care of users' data and privacy.
+5. Publish your code as required by the applicable licences.
 
 # Quick Compilation Guide
 
@@ -83,15 +89,14 @@ Occasionally, you might observe the following message in your build log:
 
 Should this occur, simply cancel the ongoing build and initiate a new one.
 
-## Telegram_xcodeproj: no such package 
+## Telegram_xcodeproj: no such package
 
-Following a system restart, the auto-generated Xcode project might encounter a build failure accompanied by this error:
+Following a system restart, the auto-generated Xcode project might encounter this error:
 ```
 ERROR: Skipping '@rules_xcodeproj_generated//generator/Telegram/Telegram_xcodeproj:Telegram_xcodeproj': no such package '@rules_xcodeproj_generated//generator/Telegram/Telegram_xcodeproj': BUILD file not found in directory 'generator/Telegram/Telegram_xcodeproj' of external repository @rules_xcodeproj_generated. Add a BUILD file to a directory to mark it as a package.
 ```
 
-If you encounter this issue, re-run the project generation steps in the README.
-
+If this issue occurs, re-run the project generation steps in the README.
 
 # Tips
 
@@ -109,8 +114,8 @@ python3 build-system/Make/Make.py \
 
 ## Versions
 
-Each release is built using a specific Xcode version (see `versions.json`). The helper script checks the versions of the installed software and reports an error if they don't match the ones specified in `versions.json`. It is possible to bypass these checks:
+Each release is built using a specific Xcode version (see `versions.json`). The helper script checks that installed software matches the specified versions. It is possible to bypass these checks:
 
 ```
-python3 build-system/Make/Make.py --overrideXcodeVersion build ... # Don't check the version of Xcode
+python3 build-system/Make/Make.py --overrideXcodeVersion build ... # Don't check the Xcode version
 ```
