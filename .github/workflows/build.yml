@@ -95,23 +95,21 @@ jobs:
           rm -rf "$OUTPUT_PATH"
           mkdir -p "$OUTPUT_PATH"
 
-          # Bazel exposes declared outputs through bazel-bin (a symlink to bazel-out).
-          # Prefer the exact output printed by Bazel, then fall back to a symlink-aware search.
+          # Bazel reports this exact artifact path; bazel-bin is its output symlink.
           IPA_PATH="bazel-bin/Telegram/Telegram.ipa"
           if [ ! -s "$IPA_PATH" ]; then
-            IPA_PATH="$(find -L bazel-bin bazel-out -type f -path '*/bin/Telegram/Telegram.ipa' -print -quit 2>/dev/null || true)"
+            IPA_PATH="$(find -L bazel-bin bazel-out -type f -path "*/bin/Telegram/Telegram.ipa" -print -quit 2>/dev/null || true)"
           fi
           if [ -z "$IPA_PATH" ] || [ ! -s "$IPA_PATH" ]; then
-            echo "Could not find a non-empty device IPA. Bazel expected bazel-bin/Telegram/Telegram.ipa."
-            echo "Available Bazel output links:"
+            echo "Could not find a non-empty device IPA at bazel-bin/Telegram/Telegram.ipa."
             ls -la | grep bazel || true
             exit 1
           fi
           cp "$IPA_PATH" "$OUTPUT_PATH/EndoGram.ipa"
           test -s "$OUTPUT_PATH/EndoGram.ipa"
           /usr/bin/unzip -t "$OUTPUT_PATH/EndoGram.ipa"
-          /usr/bin/unzip -Z1 "$OUTPUT_PATH/EndoGram.ipa" | grep -q '^Payload/Telegram.app/Info.plist
-
+          /usr/bin/unzip -Z1 "$OUTPUT_PATH/EndoGram.ipa" | grep -Fqx "Payload/Telegram.app/Info.plist"
+          echo "Verified IPA: $OUTPUT_PATH/EndoGram.ipa"
       - name: Upload EndoGram IPA
         uses: actions/upload-artifact@v4
         with:
